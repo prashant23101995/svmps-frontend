@@ -18,7 +18,7 @@ const Navbar = () => {
       <header className="navbar-container">
         <div className="navbar-left">
           <img
-            src="/Hamburger.svg"
+            src="Hamburger.svg"
             alt="Menu"
             className="hamburger-icon"
             onClick={toggleSidebar}
