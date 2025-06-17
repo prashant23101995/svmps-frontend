@@ -7,5 +7,5 @@ URL_DATABASE = 'mysql+pymysql://root:root@localhost:3306/myapp'
 engine = create_engine(URL_DATABASE)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
+#Comment changes
 Base = declarative_base()
