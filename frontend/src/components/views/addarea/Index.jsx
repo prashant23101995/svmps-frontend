@@ -1,28 +1,50 @@
-import React, { useState } from "react";
-import "./Area.css"
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./Area.css";
 
 const Addarea = () => {
   const [areas, setAreas] = useState([]);
   const [search, setSearch] = useState("");
   const [newArea, setNewArea] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const areasPerPage = 5;
+  const [totalCount, setTotalCount] = useState(0);
+  const areasPerPage = 10;
 
-  const handleAddArea = () => {
-    if (newArea.trim()) {
-      setAreas([...areas, newArea.trim()]);
-      setNewArea("");
+  // Fetch areas from backend
+  const fetchAreas = async (page = 1, searchValue = "") => {
+    try {
+      const response = await axios.get("http://localhost:8001/area/", {
+        params: {
+          page_num: page,
+          area: searchValue || undefined
+        }
+      });
+      setAreas(response.data.data);
+      setTotalCount(response.data.total_count);
+    } catch (error) {
+      console.error("Error fetching areas:", error);
     }
   };
 
-  const filteredAreas = areas.filter((area) =>
-    area.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    fetchAreas(currentPage, search);
+  }, [currentPage, search]);
 
-  const totalPages = Math.ceil(filteredAreas.length / areasPerPage);
-  const indexOfLast = currentPage * areasPerPage;
-  const indexOfFirst = indexOfLast - areasPerPage;
-  const currentAreas = filteredAreas.slice(indexOfFirst, indexOfLast);
+  const handleAddArea = async () => {
+    if (newArea.trim()) {
+      try {
+        await axios.post("http://localhost:8001/area/", {
+          area: newArea.trim(),
+        });
+        setNewArea("");
+        fetchAreas(currentPage, search);
+      } catch (error) {
+        alert(error.response?.data?.detail || "Error adding area.");
+      }
+    }
+  };
+
+  const totalPages = Math.ceil(totalCount / areasPerPage);
 
   return (
     <div className="addarea-container">
@@ -52,10 +74,10 @@ const Addarea = () => {
         />
 
         <ul className="area-list">
-          {currentAreas.length > 0 ? (
-            currentAreas.map((area, idx) => (
-              <li key={idx} className="area-item">
-                {area}
+          {areas.length > 0 ? (
+            areas.map((area) => (
+              <li key={area.area_id} className="area-item">
+                {area.area}
               </li>
             ))
           ) : (
